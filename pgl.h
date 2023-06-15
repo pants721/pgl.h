@@ -48,7 +48,6 @@ void pgl_circle(pgl_canvas *pc, int center_x, int center_y, int r,
                 uint32_t color);
 void pgl_triangle(pgl_canvas *pc, int x1, int y1, int x2, int y2, int x3,
                   int y3, uint32_t color);
-
 bool pgl_in_bounds(pgl_canvas *pc, int x, int y);
 
 #endif // PGL_H
