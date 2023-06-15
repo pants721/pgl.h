@@ -5,6 +5,7 @@
 
 #include "SDL.h"
 
+#include "SDL_render.h"
 #include "pgl.h"
 
 #define WIN_W 1280
@@ -29,11 +30,11 @@ int main(int argc, char **argv) {
     while (!quit) {
         SDL_Event ev;
         while (SDL_PollEvent(&ev)) {
-          switch (ev.type) {
-          case SDL_QUIT:
-            quit = true;
-            break;
-          }
+            switch (ev.type) {
+            case SDL_QUIT:
+                quit = true;
+                break;
+            }
         }
 
         pgl_clear(pc);
