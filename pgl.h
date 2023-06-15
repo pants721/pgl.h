@@ -16,6 +16,9 @@
 
 #define PGL_MIN(a,b) (((a)<(b))?(a):(b))
 #define PGL_MAX(a,b) (((a)>(b))?(a):(b))
+#define PGL_SWAP(T, a, b) do { T t = a; a = b; b = t; } while (0)
+#define PGL_ABS(x) ((x) > 0 ? (x) : -(x))
+#define PGL_SIGN(x) (((x) > 0) - ((x) < 0))
 
 // Colors
 #define PGL_RGBA(r, g, b, a) ((((r)&0xFF)<<(8*0))   \
@@ -42,8 +45,11 @@ pgl_canvas *pgl_canvas_new(uint32_t *pixels, int width, int height);
 
 void pgl_set_pixel(pgl_canvas *pc, int x, int y, uint32_t color);
 void pgl_clear(pgl_canvas *pc);
+void pgl_fill(pgl_canvas *pc, uint32_t color);
 void pgl_line(pgl_canvas *pc, int x1, int y1, int x2, int y2, uint32_t color);
 void pgl_rect(pgl_canvas *pc, int x, int y, int w, int h, uint32_t color);
+void pgl_frame(pgl_canvas *pc, int x, int y, int w, int h, int thickness,
+               uint32_t color);
 void pgl_circle(pgl_canvas *pc, int center_x, int center_y, int r,
                 uint32_t color);
 void pgl_triangle(pgl_canvas *pc, int x1, int y1, int x2, int y2, int x3,
@@ -56,7 +62,6 @@ bool pgl_in_bounds(pgl_canvas *pc, int x, int y);
 // Pants Graphics Library implementation
 // =============================================================================
 
-#define PGL_IMPLEMENTATION
 #ifdef PGL_IMPLEMENTATION
 
 #include <math.h>
@@ -79,8 +84,14 @@ void pgl_set_pixel(pgl_canvas *pc, int x, int y, uint32_t color) {
 }
 
 void pgl_clear(pgl_canvas *pc) {
-    for (int i = 0; i < pc->width * pc->height; i++) {
+    for (size_t i = 0; i < pc->width * pc->height; i++) {
         pc->pixels[i] = NULL;
+    }
+}
+
+void pgl_fill(pgl_canvas *pc, uint32_t color) {
+    for (size_t i = 0; i < pc->width * pc->height; i++) {
+        pc->pixels[i] = color;
     }
 }
 
@@ -113,11 +124,18 @@ void pgl_line(pgl_canvas *pc, int x1, int y1, int x2, int y2,
 
 void pgl_rect(pgl_canvas *pc, int x, int y, int w, int h, uint32_t color) {
     int y_dest = y + h;
-
-    while (y <= y_dest) {
-        pgl_line(pc, x, y, x + w, y, color);
+    while (y < y_dest) {
+        pgl_line(pc, x, y, x + w - 1, y, color);
         y++;
     }
+}
+
+void pgl_frame(pgl_canvas *pc, int x, int y, int w, int h, int thickness,
+               uint32_t color) {
+    pgl_rect(pc, x, y, w, thickness, color); // Top line
+    pgl_rect(pc, x, y, thickness, h, color); // Left line
+    pgl_rect(pc, x, y + h - thickness, w, thickness, color); // Bottom line
+    pgl_rect(pc, x + w - thickness, y, thickness, h, color); // Right line
 }
 
 void pgl_circle(pgl_canvas *pc, int center_x, int center_y, int r, 
@@ -181,6 +199,7 @@ void pgl_triangle(pgl_canvas *pc, int x1, int y1, int x2, int y2,
     int x_temp;
     int y_temp;
 
+    // TODO: Use PGL_SWAP here
     if (y1 > y2) {
         x_temp = x1; y_temp = y1;
         x1 = x2; y1 = y2;
