@@ -5,7 +5,7 @@
 
 #include "SDL.h"
 
-#include "SDL_render.h"
+#define PGL_IMPLEMENTATION
 #include "pgl.h"
 
 #define WIN_W 1280
@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
         pgl_triangle(pc, 100, 100, 500, 500, 700, 300, PGL_BLUE);
         pgl_circle(pc, tick, 100, 500, PGL_GREEN);
 
-        SDL_UpdateTexture(texture, NULL, pc->pixels, WIN_W * 4);
+        SDL_UpdateTexture(texture, NULL, pixels, WIN_W * 4);
         SDL_RenderCopyEx(renderer, texture, NULL, NULL, 0.0, NULL,
                          SDL_FLIP_NONE);
         SDL_RenderPresent(renderer);
