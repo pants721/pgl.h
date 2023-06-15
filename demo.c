@@ -41,6 +41,7 @@ int main(int argc, char **argv) {
 
         pgl_triangle(pc, 100, 100, 500, 500, 700, 300, PGL_BLUE);
         pgl_circle(pc, tick, 100, 500, PGL_GREEN);
+        pgl_rect(pc, 700, 200, 400, 200, PGL_MAGENTA);
 
         SDL_UpdateTexture(texture, NULL, pixels, WIN_W * 4);
         SDL_RenderCopyEx(renderer, texture, NULL, NULL, 0.0, NULL,

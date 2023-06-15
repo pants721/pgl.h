@@ -43,6 +43,7 @@ pgl_canvas *pgl_canvas_new(uint32_t *pixels, int width, int height);
 void pgl_set_pixel(pgl_canvas *pc, int x, int y, uint32_t color);
 void pgl_clear(pgl_canvas *pc);
 void pgl_line(pgl_canvas *pc, int x1, int y1, int x2, int y2, uint32_t color);
+void pgl_rect(pgl_canvas *pc, int x, int y, int w, int h, uint32_t color);
 void pgl_circle(pgl_canvas *pc, int center_x, int center_y, int r,
                 uint32_t color);
 void pgl_triangle(pgl_canvas *pc, int x1, int y1, int x2, int y2, int x3,
@@ -56,6 +57,7 @@ bool pgl_in_bounds(pgl_canvas *pc, int x, int y);
 // Pants Graphics Library implementation
 // =============================================================================
 
+#define PGL_IMPLEMENTATION
 #ifdef PGL_IMPLEMENTATION
 
 #include <math.h>
@@ -110,26 +112,35 @@ void pgl_line(pgl_canvas *pc, int x1, int y1, int x2, int y2,
     }
 }
 
+void pgl_rect(pgl_canvas *pc, int x, int y, int w, int h, uint32_t color) {
+    int y_dest = y + h;
+
+    while (y <= y_dest) {
+        pgl_line(pc, x, y, x + w, y, color);
+        y++;
+    }
+}
+
 void pgl_circle(pgl_canvas *pc, int center_x, int center_y, int r, 
         uint32_t color) {
     int t1 = r / 16;
     int x = r;
     int y = 0;
     while (x >= y) {
-      pgl_line(pc, center_x + x, center_y + y, center_x - x, center_y + y,
+        pgl_line(pc, center_x + x, center_y + y, center_x - x, center_y + y,
                color);
-      pgl_line(pc, center_x + x, center_y - y, center_x - x, center_y - y,
+        pgl_line(pc, center_x + x, center_y - y, center_x - x, center_y - y,
                color);
-      pgl_line(pc, center_x + y, center_y + x, center_x - y, center_y + x,
+        pgl_line(pc, center_x + y, center_y + x, center_x - y, center_y + x,
                color);
-      pgl_line(pc, center_x + y, center_y - x, center_x - y, center_y - x,
+        pgl_line(pc, center_x + y, center_y - x, center_x - y, center_y - x,
                color);
-      y += 1;
-      t1 += y;
-      int t2 = t1 - x;
-      if (t2 >= 0) {
-        t1 = t2;
-        x -= 1;
+        y += 1;
+        t1 += y;
+        int t2 = t1 - x;
+        if (t2 >= 0) {
+            t1 = t2;
+            x -= 1;
         }
     }
 }
