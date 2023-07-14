@@ -37,12 +37,18 @@ int main(int argc, char **argv) {
             }
         }
 
-        pgl_clear(pc);
+        pgl_fill(pc, PGL_DARKGRAY);
 
-        pgl_triangle(pc, 100, 100, 500, 500, 700, 300, PGL_BLUE);
+        pgl_rect(pc, 700, 200, 400, 200, PGL_WHITE);
+	pgl_triangle(pc, 123, 125, 390, 400, 1, 230, PGL_GREEN);
         pgl_circle(pc, tick, 100, 100, PGL_GREEN);
-        pgl_frame(pc, 100, 100, 700, 800, 1, PGL_CYAN);
-        pgl_rect(pc, 700, 200, 400, 200, PGL_MAGENTA);
+        pgl_triangle(pc, 100, 100, 500, 500, 700, 300, PGL_BLUE);
+	pgl_triangle(pc, 800, 800, 250, 1, 300, 500, PGL_MAGENTA);
+	pgl_triangle_frame(pc, 123, 125, 390, 400, 1, 230, 1, PGL_RED);
+        pgl_triangle_frame(pc, 100, 100, 500, 500, 700, 300, 1, PGL_CYAN);
+	/* pgl_triangle(pc, 700, 700, 1100, 600, 600, 600, PGL_BLUE); */
+        /* pgl_circle(pc, tick, 100, 100, PGL_GREEN); */
+        /* pgl_frame(pc, 100, 100, 700, 800, 1, PGL_CYAN); */
 
         SDL_UpdateTexture(texture, NULL, pixels, WIN_W * 4);
         SDL_RenderCopyEx(renderer, texture, NULL, NULL, 0.0, NULL,
@@ -55,5 +61,5 @@ int main(int argc, char **argv) {
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    return 0;
+    return EXIT_SUCCESS;
 }
