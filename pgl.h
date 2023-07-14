@@ -62,6 +62,7 @@ bool pgl_in_bounds(pgl_canvas *pc, int x, int y);
 // Pants Graphics Library implementation
 // =============================================================================
 
+#define PGL_IMPLEMENTATION
 #ifdef PGL_IMPLEMENTATION
 
 #include <math.h>
@@ -123,10 +124,16 @@ void pgl_line(pgl_canvas *pc, int x1, int y1, int x2, int y2,
 }
 
 void pgl_rect(pgl_canvas *pc, int x, int y, int w, int h, uint32_t color) {
-    int y_dest = y + h;
-    while (y < y_dest) {
-        pgl_line(pc, x, y, x + w - 1, y, color);
-        y++;
+    /* int y_dest = y + h; */
+    /* while (y < y_dest) { */
+    /*     pgl_line(pc, x, y, x + w - 1, y, color); */
+    /*     y++; */
+    /* } */
+
+    for (int col = 0; col <= w; ++col) {
+	for (int row = 0; row <= h; ++row) {
+	    pgl_set_pixel(pc, col + x, row + y, color);
+	}
     }
 }
 

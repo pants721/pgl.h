@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 
 #define PGL_IMPLEMENTATION
 #include "pgl.h"
@@ -39,8 +39,8 @@ int main(int argc, char **argv) {
 
         pgl_clear(pc);
 
-        /* pgl_triangle(pc, 100, 100, 500, 500, 700, 300, PGL_BLUE); */
-        /* pgl_circle(pc, tick, 100, 500, PGL_GREEN); */
+        pgl_triangle(pc, 100, 100, 500, 500, 700, 300, PGL_BLUE);
+        pgl_circle(pc, tick, 100, 100, PGL_GREEN);
         pgl_frame(pc, 100, 100, 700, 800, 1, PGL_CYAN);
         pgl_rect(pc, 700, 200, 400, 200, PGL_MAGENTA);
 
