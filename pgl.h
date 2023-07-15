@@ -115,7 +115,7 @@ void pgl_blend_pixel(pgl_canvas *pc, int x, int y, uint32_t color) {
     b1 = (b1 * (255 - a2) + b2 * a2) / 255; if (b1 > 255) b1 = 255;
 
     if (pgl_in_bounds(pc, x, y)) {
-	PGL_PIXEL(pc, x, y) = (pc, x, y, PGL_RGBA(r1, g1, b1, a1));
+	PGL_PIXEL(pc, x, y) = PGL_RGBA(r1, g1, b1, a1);
     }
 }
 
@@ -178,25 +178,27 @@ void pgl_rect_frame(pgl_canvas *pc, int x, int y, int w, int h, int thickness,
 // FIXME: Overdrawing that shows when transparent
 void pgl_circle(pgl_canvas *pc, int center_x, int center_y, int r, 
         uint32_t color) {
-    int t1 = r / 16;
-    int x = r;
-    int y = 0;
-    while (x >= y) {
-        pgl_line(pc, center_x + x, center_y + y, center_x - x, center_y + y,
-               color);
-        pgl_line(pc, center_x + x, center_y - y, center_x - x, center_y - y,
-               color);
-        pgl_line(pc, center_x + y, center_y + x, center_x - y, center_y + x,
-               color);
-        pgl_line(pc, center_x + y, center_y - x, center_x - y, center_y - x,
-               color);
-        y += 1;
-        t1 += y;
-        int t2 = t1 - x;
-        if (t2 >= 0) {
-            t1 = t2;
-            x -= 1;
-        }
+    int x = 0;
+    int y = r;
+    int m = 5 - 4 * r;
+
+    while (x <= y) {
+        pgl_line(pc, center_x - y, center_y - x, center_x + y, center_y - x,
+		 color);
+        pgl_line(pc, center_x - y, center_y + x, center_x + y, center_y + x,
+		 color);
+
+	if (m > 0) {
+	    pgl_line(pc, center_x - x, center_y - y, center_x + x, center_y - y,
+		     color);
+	    pgl_line(pc, center_x - x, center_y + y, center_x + x, center_y + y,
+		     color);
+	    y--;
+	    m -= 8 * y;
+	}
+
+	x++;
+	m += 8 * x + 4;
     }
 }
 
@@ -253,7 +255,7 @@ void pgl_triangle(pgl_canvas *pc, int x1, int y1, int x2, int y2,
 	int x_left = -1;
 	int x_right = -1;
 	for (int col = 0; col < tmp->width; ++col) {
-	    if (PGL_PIXEL(tmp, col, row) == PGL_WHITE) {
+	    if (PGL_PIXEL(tmp, col, row) == (uint32_t)PGL_WHITE) {
 		if (x_left == -1) {
 		    x_left = col;
 		} else {
