@@ -4,7 +4,7 @@ set -xe
 
 CC="${CXX:-cc}"
 PKGS="sdl2"
-CFLAGS="-Wall -Wextra -std=c2x -pedantic -ggdb"
+CFLAGS="-Wall -Wextra -std=c2x -pedantic -ggdb -O3"
 LIBS=-lm
 SRC="demo.c"
 
