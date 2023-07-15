@@ -29,17 +29,22 @@
                               | (((g)&0xFF)<<(8*1)) \
                               | (((b)&0xFF)<<(8*2)) \
                               | (((a)&0xFF)<<(8*3)))
-#define PGL_BLACK    PGL_RGBA(0, 0, 0, 1)
-#define PGL_WHITE    PGL_RGBA(255, 255, 255, 1)
-#define PGL_RED      PGL_RGBA(255, 0, 0, 1)
-#define PGL_GREEN    PGL_RGBA(0, 255, 0, 1)
-#define PGL_BLUE     PGL_RGBA(0, 0, 255, 1)
-#define PGL_YELLOW   PGL_RGBA(255, 255, 0, 1)
-#define PGL_MAGENTA  PGL_RGBA(255, 0, 255, 1)
-#define PGL_CYAN     PGL_RGBA(0, 255, 255, 1)
-#define PGL_SILVER   PGL_RGBA(192, 192, 192, 1)
-#define PGL_GRAY     PGL_RGBA(128, 128, 128, 1)
-#define PGL_DARKGRAY PGL_RGBA(64, 64, 64, 1)
+#define PGL_GET_RED(color)   (((color)&0x000000FF)>>(8*0))
+#define PGL_GET_GREEN(color) (((color)&0x0000FF00)>>(8*1))
+#define PGL_GET_BLUE(color)  (((color)&0x00FF0000)>>(8*2))
+#define PGL_GET_ALPHA(color) (((color)&0xFF000000)>>(8*3))
+
+#define PGL_BLACK    PGL_RGBA(0, 0, 0, 255)
+#define PGL_WHITE    PGL_RGBA(255, 255, 255, 255)
+#define PGL_RED      PGL_RGBA(255, 0, 0, 255)
+#define PGL_GREEN    PGL_RGBA(0, 255, 0, 255)
+#define PGL_BLUE     PGL_RGBA(0, 0, 255, 255)
+#define PGL_YELLOW   PGL_RGBA(255, 255, 0, 255)
+#define PGL_MAGENTA  PGL_RGBA(255, 0, 255, 255)
+#define PGL_CYAN     PGL_RGBA(0, 255, 255, 255)
+#define PGL_SILVER   PGL_RGBA(192, 192, 192, 255)
+#define PGL_GRAY     PGL_RGBA(128, 128, 128, 255)
+#define PGL_DARKGRAY PGL_RGBA(64, 64, 64, 255)
 
 typedef struct pgl_canvas {
     uint32_t *pixels;
@@ -49,7 +54,8 @@ typedef struct pgl_canvas {
 pgl_canvas *pgl_canvas_new(uint32_t *pixels, int width, int height);
 void pgl_canvas_destroy(pgl_canvas *pc);
 
-void pgl_set_pixel(pgl_canvas *pc, int x, int y, uint32_t color);
+void pgl_blend_pixel(pgl_canvas *pc, int x, int y, uint32_t color);
+void _pgl_set_pixel(pgl_canvas *pc, int x, int y, uint32_t color);
 void pgl_fill(pgl_canvas *pc, uint32_t color);
 void pgl_line(pgl_canvas *pc, int x1, int y1, int x2, int y2, uint32_t color);
 void pgl_rect(pgl_canvas *pc, int x, int y, int w, int h, uint32_t color);
@@ -91,7 +97,30 @@ void pgl_canvas_destroy(pgl_canvas *pc) {
     free(pc);
 }
 
-void pgl_set_pixel(pgl_canvas *pc, int x, int y, uint32_t color) {
+void pgl_blend_pixel(pgl_canvas *pc, int x, int y, uint32_t color) {
+    uint32_t c1 = PGL_PIXEL(pc, x, y);
+
+    uint32_t r1 = PGL_GET_RED(c1);
+    uint32_t g1 = PGL_GET_GREEN(c1);
+    uint32_t b1 = PGL_GET_BLUE(c1);
+    uint32_t a1 = PGL_GET_ALPHA(c1);
+
+    uint32_t r2 = PGL_GET_RED(color);
+    uint32_t g2 = PGL_GET_GREEN(color);
+    uint32_t b2 = PGL_GET_BLUE(color);
+    uint32_t a2 = PGL_GET_ALPHA(color);
+
+    r1 = (r1 * (255 - a2) + r2 * a2) / 255; if (r1 > 255) r1 = 255;
+    g1 = (g1 * (255 - a2) + g2 * a2) / 255; if (g1 > 255) g1 = 255;
+    b1 = (b1 * (255 - a2) + b2 * a2) / 255; if (b1 > 255) b1 = 255;
+
+    if (pgl_in_bounds(pc, x, y)) {
+	PGL_PIXEL(pc, x, y) = (pc, x, y, PGL_RGBA(r1, g1, b1, a1));
+    }
+}
+
+// DEPRECATED: Use pgl_blend_pixel
+void _pgl_set_pixel(pgl_canvas *pc, int x, int y, uint32_t color) {
     if (pgl_in_bounds(pc, x, y)) {
 	PGL_PIXEL(pc, x, y) = color;
     }
@@ -114,7 +143,7 @@ void pgl_line(pgl_canvas *pc, int x1, int y1, int x2, int y2,
     int e = dx + dy;
 
     while (true) {
-        pgl_set_pixel(pc, x1, y1, color);
+	pgl_blend_pixel(pc, x1, y1, color);
         if (x1 == x2 && y1 == y2) { break; }
         int e2 = 2 * e;
         if (e2 >= dy) {
@@ -133,7 +162,7 @@ void pgl_line(pgl_canvas *pc, int x1, int y1, int x2, int y2,
 void pgl_rect(pgl_canvas *pc, int x, int y, int w, int h, uint32_t color) {
     for (int col = 0; col <= w; ++col) {
 	for (int row = 0; row <= h; ++row) {
-	    pgl_set_pixel(pc, col + x, row + y, color);
+	    pgl_blend_pixel(pc, col + x, row + y, color);
 	}
     }
 }
@@ -146,6 +175,7 @@ void pgl_rect_frame(pgl_canvas *pc, int x, int y, int w, int h, int thickness,
     pgl_rect(pc, x + w - thickness, y, thickness, h, color); // Right line
 }
 
+// FIXME: Overdrawing that shows when transparent
 void pgl_circle(pgl_canvas *pc, int center_x, int center_y, int r, 
         uint32_t color) {
     int t1 = r / 16;
@@ -170,7 +200,7 @@ void pgl_circle(pgl_canvas *pc, int center_x, int center_y, int r,
     }
 }
 
-// NOTE: Looks like shit unless thickness 1
+// FIXME: Looks like shit unless thickness 1
 void pgl_triangle_frame(pgl_canvas *pc, int x1, int y1, int x2, int y2,
 			int x3, int y3, int thickness, uint32_t color) {
     if (y1 > y2) {
@@ -233,11 +263,10 @@ void pgl_triangle(pgl_canvas *pc, int x1, int y1, int x2, int y2,
 	}
 
 	// HACK: for single pixel lines, only one side is -1
-	/* printf("%d, %d\n", x_left, x_right); */
 	if (x_right == -1 && x_left != -1) {
-	    pgl_set_pixel(pc, x_left, row, color);
+	    pgl_blend_pixel(pc, x_left, row, color);
 	} else if (x_left == -1 && x_right != -1) {
-	    pgl_set_pixel(pc, x_right, row, color);
+	    pgl_blend_pixel(pc, x_right, row, color);
 	} else if (x_left != -1 && x_right != -1) { // Both sides are found
 	    pgl_line(pc, x_left, row, x_right, row, color);
 	}
