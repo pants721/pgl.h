@@ -52,7 +52,6 @@ typedef struct pgl_canvas {
 } pgl_canvas;
 
 pgl_canvas *pgl_canvas_new(uint32_t *pixels, int width, int height);
-void pgl_canvas_destroy(pgl_canvas *pc);
 
 void pgl_blend_pixel(pgl_canvas *pc, int x, int y, uint32_t color);
 void _pgl_set_pixel(pgl_canvas *pc, int x, int y, uint32_t color);
@@ -90,11 +89,6 @@ pgl_canvas *pgl_canvas_new(uint32_t *pixels, int width, int height) {
     pc->width = width;
     pc->height = height;
     return pc;
-}
-
-void pgl_canvas_destroy(pgl_canvas *pc) {
-    free(pc->pixels);
-    free(pc);
 }
 
 void pgl_blend_pixel(pgl_canvas *pc, int x, int y, uint32_t color) {
@@ -168,7 +162,7 @@ void pgl_rect(pgl_canvas *pc, int x, int y, int w, int h, uint32_t color) {
 }
 
 void pgl_rect_frame(pgl_canvas *pc, int x, int y, int w, int h, int thickness,
-               uint32_t color) {
+                    uint32_t color) {
     pgl_rect(pc, x, y, w, thickness, color); // Top line
     pgl_rect(pc, x, y, thickness, h, color); // Left line
     pgl_rect(pc, x, y + h - thickness, w, thickness, color); // Bottom line
@@ -177,7 +171,7 @@ void pgl_rect_frame(pgl_canvas *pc, int x, int y, int w, int h, int thickness,
 
 // FIXME: Overdrawing that shows when transparent
 void pgl_circle(pgl_canvas *pc, int center_x, int center_y, int r, 
-        uint32_t color) {
+                uint32_t color) {
     int x = 0;
     int y = r;
     int m = 5 - 4 * r;
