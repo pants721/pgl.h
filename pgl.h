@@ -25,10 +25,10 @@
 #define PGL_PIXEL(c,x,y) (c)->pixels[(x) + ((y) * (c)->width)]
 
 // Colors
-#define PGL_RGBA(r, g, b, a) ((((r)&0xFF)<<(8*0))   \
-                              | (((g)&0xFF)<<(8*1)) \
-                              | (((b)&0xFF)<<(8*2)) \
-                              | (((a)&0xFF)<<(8*3)))
+#define PGL_RGBA(r, g, b, a) ((((r)&0xFF)<<(8*0))       \
+                              | (((g)&0xFF)<<(8*1))     \
+                              | (((b)&0xFF)<<(8*2))     \
+                              | (((a)&0xFF)<<(8*3)))                                        
 #define PGL_GET_RED(color)   (((color)&0x000000FF)>>(8*0))
 #define PGL_GET_GREEN(color) (((color)&0x0000FF00)>>(8*1))
 #define PGL_GET_BLUE(color)  (((color)&0x00FF0000)>>(8*2))
@@ -59,13 +59,13 @@ void pgl_fill(pgl_canvas *pc, uint32_t color);
 void pgl_line(pgl_canvas *pc, int x1, int y1, int x2, int y2, uint32_t color);
 void pgl_rect(pgl_canvas *pc, int x, int y, int w, int h, uint32_t color);
 void pgl_rect_frame(pgl_canvas *pc, int x, int y, int w, int h, int thickness,
-               uint32_t color);
+                    uint32_t color);
 void pgl_circle(pgl_canvas *pc, int center_x, int center_y, int r,
                 uint32_t color);
 void pgl_triangle(pgl_canvas *pc, int x1, int y1, int x2, int y2, int x3,
                   int y3, uint32_t color);
 void pgl_triangle_frame(pgl_canvas *pc, int x1, int y1, int x2, int y2, int x3,
-			int y3, int thickness, uint32_t color);
+                        int y3, int thickness, uint32_t color);
 bool pgl_in_bounds(pgl_canvas *pc, int x, int y);
 
 #endif // PGL_H
@@ -178,21 +178,21 @@ void pgl_circle(pgl_canvas *pc, int center_x, int center_y, int r,
 
     while (x <= y) {
         pgl_line(pc, center_x - y, center_y - x, center_x + y, center_y - x,
-		 color);
+                 color);
         pgl_line(pc, center_x - y, center_y + x, center_x + y, center_y + x,
-		 color);
+                 color);
 
-	if (m > 0) {
-	    pgl_line(pc, center_x - x, center_y - y, center_x + x, center_y - y,
-		     color);
-	    pgl_line(pc, center_x - x, center_y + y, center_x + x, center_y + y,
-		     color);
-	    y--;
-	    m -= 8 * y;
-	}
+        if (m > 0) {
+            pgl_line(pc, center_x - x, center_y - y, center_x + x, center_y - y,
+                     color);
+            pgl_line(pc, center_x - x, center_y + y, center_x + x, center_y + y,
+                     color);
+            y--;
+            m -= 8 * y;
+        }
 
-	x++;
-	m += 8 * x + 4;
+        x++;
+        m += 8 * x + 4;
     }
 }
 
@@ -243,7 +243,9 @@ void pgl_triangle(pgl_canvas *pc, int x1, int y1, int x2, int y2,
     // FIXME: The whole thing with the tmp and the -1
     uint32_t tmp_pixels[pc->width * pc->height];
     pgl_canvas *tmp = pgl_canvas_new(tmp_pixels, pc->width, pc->height);
-    pgl_fill(tmp, PGL_BLACK); // Clear the tmp pixels for the next triangle because for some god forsaken reason it carries over
+    // Clear the tmp pixels for the next triangle because for some god forsaken
+    // reason it carries over
+    pgl_fill(tmp, PGL_BLACK);
     pgl_triangle_frame(tmp, x1, y1, x2, y2, x3, y3, 1, PGL_WHITE);
     for (int row = 0; row < tmp->height; ++row) {
 	int x_left = -1;
